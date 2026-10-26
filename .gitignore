@@ -1,0 +1,18 @@
+# Local only: Claude Code files and internal notes
+CLAUDE.md
+.claude/
+docs/internal/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+.pytest_cache/
+.ruff_cache/
+
+# Build outputs
+build/
+dist/
+vendor/
+*.tmp

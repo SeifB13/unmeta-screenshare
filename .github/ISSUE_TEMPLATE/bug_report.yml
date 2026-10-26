@@ -1,0 +1,38 @@
+name: Bug report
+description: Something does not work as expected
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What did you do, what did you expect, what happened instead?
+    validations:
+      required: true
+  - type: input
+    id: headset
+    attributes:
+      label: Headset model and system version
+      placeholder: Meta Quest 3, v76
+    validations:
+      required: true
+  - type: input
+    id: os
+    attributes:
+      label: Computer OS
+      placeholder: Windows 11 / macOS 15 / Ubuntu 24.04
+    validations:
+      required: true
+  - type: input
+    id: versions
+    attributes:
+      label: UnMeta Screenshare and scrcpy versions
+      description: "`unmeta --version` and `scrcpy --version`"
+    validations:
+      required: true
+  - type: textarea
+    id: command
+    attributes:
+      label: scrcpy command and output
+      description: The command shown at the bottom of Display settings, and the scrcpy output from the home screen.
+      render: text

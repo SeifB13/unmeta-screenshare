@@ -1,0 +1,30 @@
+name: Headset preset
+description: Share display settings that work for a headset model
+labels: [preset]
+body:
+  - type: input
+    id: headset
+    attributes:
+      label: Headset model
+      placeholder: Meta Quest 3S
+    validations:
+      required: true
+  - type: input
+    id: crop
+    attributes:
+      label: Crop (W:H:X:Y)
+      placeholder: "1900:1400:100:300"
+    validations:
+      required: true
+  - type: input
+    id: angle
+    attributes:
+      label: Angle (degrees)
+      placeholder: "20"
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes
+      description: scrcpy version, anything that looked off, a screenshot.

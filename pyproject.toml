@@ -1,0 +1,58 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "unmeta-screenshare"
+dynamic = ["version"]
+description = "Mirror a Meta Quest headset's view and sound to your computer over Wi-Fi, without the Meta casting app."
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+requires-python = ">=3.10"
+keywords = ["meta quest", "quest 3", "scrcpy", "adb", "screen mirroring", "casting", "vr"]
+classifiers = [
+    "Environment :: Console",
+    "Intended Audience :: End Users/Desktop",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: MacOS",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+    "Topic :: Multimedia :: Video :: Display",
+]
+dependencies = [
+    "textual>=1.0",
+    "platformdirs>=4.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "pytest-asyncio>=0.23", "ruff>=0.6"]
+build = ["pyinstaller>=6.10"]
+
+[project.scripts]
+unmeta = "unmeta.__main__:main"
+
+[project.urls]
+Homepage = "https://github.com/SeifB13/unmeta-screenshare"
+Issues = "https://github.com/SeifB13/unmeta-screenshare/issues"
+
+[tool.hatch.version]
+path = "src/unmeta/__init__.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/unmeta"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP"]
+
+[tool.ruff.lint.per-file-ignores]
+"src/unmeta/i18n.py" = ["E501"]
+"tests/*" = ["E501"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
