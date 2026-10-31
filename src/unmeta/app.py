@@ -32,6 +32,8 @@ Input.port { width: 12; }
 
 class UnMetaApp(App[None]):
     TITLE = APP_NAME
+    # Textual's Ctrl+P palette only offers themes and the like: noise for this app's users.
+    ENABLE_COMMAND_PALETTE = False
     SUB_TITLE = f"v{__version__}"
     CSS = CSS
 

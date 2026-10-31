@@ -106,3 +106,14 @@ async def test_tuning_full_view_streams_raw_frame(make_app, monkeypatch):
         assert screen.frame == (4128, 2208)
         await pilot.press("ctrl+right")
         assert cfg.profiles["Q"].display.crop_x == 150
+
+
+async def test_no_command_palette(make_app):
+    cfg = Config(last_profile="Q")
+    cfg.profiles["Q"] = Profile(name="Q", host="192.168.1.80")
+    app = make_app(cfg)
+    async with app.run_test(size=(120, 40)) as pilot:
+        await pilot.pause()
+        await pilot.press("ctrl+p")
+        await pilot.pause()
+        assert type(app.screen).__name__ == "HomeScreen"
