@@ -187,6 +187,13 @@ EN: dict[str, str] = {
     "tuning.map.full_view": "Full frame shown: find the eye, then fit the rectangle on it.",
     # Help
     "help.title": "Help",
+    "help.diagnostic": "Copy a diagnostic report (I)",
+    "key.diagnostic": "Diagnostic",
+    "diag.working": "Collecting the diagnostic report…",
+    "diag.copied": "Diagnostic copied: paste it in your message (Ctrl+V).",
+    "diag.also_saved": "Also saved to {path}",
+    "diag.saved": "Diagnostic saved to {path}: attach this file to your message.",
+    "diag.failed": "Could not copy or save the diagnostic report.",
     "help.body": (
         "# Help\n\n"
         "## Every day\n\n"
@@ -201,6 +208,7 @@ EN: dict[str, str] = {
         "| D | Display settings |\n"
         "| W | Setup wizard |\n"
         "| L | Switch language |\n"
+        "| I | Copy a diagnostic report |\n"
         "| Q | Quit |\n\n"
         "## In the scrcpy window\n\n"
         "MOD is Left Alt or Left Super by default.\n\n"
@@ -397,6 +405,13 @@ FR: dict[str, str] = {
     "tuning.map.outside": "⚠ Le recadrage dépasse le bord de l'image.",
     "tuning.map.full_view": "Image complète affichée : repère l'œil, puis places-y le rectangle.",
     "help.title": "Aide",
+    "help.diagnostic": "Copier un rapport de diagnostic (I)",
+    "key.diagnostic": "Diagnostic",
+    "diag.working": "Préparation du rapport de diagnostic…",
+    "diag.copied": "Diagnostic copié : colle-le dans ton message (Ctrl+V).",
+    "diag.also_saved": "Également enregistré dans {path}",
+    "diag.saved": "Diagnostic enregistré dans {path} : joins ce fichier à ton message.",
+    "diag.failed": "Impossible de copier ou d'enregistrer le rapport de diagnostic.",
     "help.body": (
         "# Aide\n\n"
         "## Au quotidien\n\n"
@@ -411,6 +426,7 @@ FR: dict[str, str] = {
         "| D | Réglages d'affichage |\n"
         "| W | Assistant de configuration |\n"
         "| L | Changer de langue |\n"
+        "| I | Copier un rapport de diagnostic |\n"
         "| Q | Quitter |\n\n"
         "## Dans la fenêtre scrcpy\n\n"
         "MOD correspond par défaut à Alt gauche ou Super gauche.\n\n"

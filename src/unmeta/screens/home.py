@@ -27,6 +27,7 @@ class HomeScreen(Screen[None]):
         Binding("c", "connect", t("home.key.connect")),
         Binding("d", "display", t("home.key.display")),
         Binding("w", "setup", t("home.key.setup")),
+        Binding("i", "app.copy_diagnostic", t("key.diagnostic")),
         Binding("question_mark,f1", "help", t("key.help")),
         Binding("l", "language", t("home.key.language")),
         Binding("q", "app.quit", t("key.quit")),

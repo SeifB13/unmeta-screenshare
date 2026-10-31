@@ -98,6 +98,7 @@ Allume le casque, lance l'app, appuie sur **Espace**.
 | D | Réglages d'affichage |
 | W | Assistant de configuration |
 | L | Changer de langue |
+| I | Copier un rapport de diagnostic |
 | ? | Aide |
 | Q | Quitter |
 
@@ -120,6 +121,8 @@ Pendant la diffusion, les changements s'appliquent tout seuls après une courte 
 Les réglages sont enregistrés par casque dans `config.json` (`unmeta --print-config-path` indique où).
 
 ## Dépannage
+
+Pour signaler un problème, appuie sur `I` à l'accueil : un rapport (versions, casque, réglages, journal récent, sans numéro de série) est copié dans le presse-papiers, prêt à coller.
 
 - **Casque injoignable** : il est en veille, sur un autre réseau, ou a redémarré (refais l'assistant avec le câble).
 - **Pas de demande de débogage** : débranche et rebranche le câble ; vérifie le mode développeur ; essaie un autre câble.
