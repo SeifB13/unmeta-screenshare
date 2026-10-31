@@ -13,7 +13,7 @@ UnMeta Screenshare est une petite app en terminal pour Windows, macOS et Linux. 
 ## Fonctionnalités
 
 - **Configuration guidée** : brancher, autoriser le débogage USB, activer l'ADB Wi-Fi, lire l'IP, débrancher, se connecter. Chaque étape explique quoi faire et avance toute seule quand le casque est détecté.
-- **Diffusion en une touche** : Espace sur l'écran d'accueil.
+- **Diffusion en une touche** : Espace sur l'écran d'accueil. Si le Wi-Fi coupe, l'app se reconnecte et relance la diffusion toute seule (pendant une minute au plus).
 - **Réglages d'affichage en direct** : déplace ou redimensionne le recadrage avec les flèches, pivote avec + / -, change l'audio, les IPS, le débit, le mode fenêtre. scrcpy redémarre en une seconde environ pour afficher chaque changement.
 - **Audio** : désactivé, PC uniquement, ou casque + PC en même temps.
 - **Casques enregistrés** : plusieurs casques, chacun avec son adresse et ses réglages.

@@ -30,6 +30,12 @@ EN: dict[str, str] = {
         "The headset refused the connection. Put it on, accept the debugging prompt, then retry."
     ),
     "stream.ended": "Streaming ended.",
+    "stream.reconnecting": "Connection to {addr} lost: reconnecting…",
+    "stream.reconnected": "Reconnected: streaming again.",
+    "stream.lost": (
+        "Could not reconnect to {addr} within a minute. Check that the headset is on and "
+        "on the same Wi-Fi, then press Space. After a reboot, run the wizard again (W)."
+    ),
     "stream.crashed": "scrcpy stopped with code {code}. See the log on the home screen.",
     "lang.changed": "Language set to {lang}. Restart the app to apply it.",
     "preset.quest3": "Meta Quest 3 (one eye, straightened)",
@@ -50,6 +56,7 @@ EN: dict[str, str] = {
     "home.status.idle": "○ Not connected",
     "home.status.connecting": "… Connecting to {addr}",
     "home.status.connected": "● Connected to {addr}",
+    "home.status.reconnecting": "… Connection lost, reconnecting to {addr} (Space to stop)",
     "home.status.streaming": (
         "▶ Streaming from {addr}\n"
         "In the scrcpy window: Alt+F toggles fullscreen, closing the window stops streaming.\n"
@@ -249,6 +256,13 @@ FR: dict[str, str] = {
         "Le casque a refusé la connexion. Mets-le, accepte la demande de débogage, puis réessaie."
     ),
     "stream.ended": "Diffusion terminée.",
+    "stream.reconnecting": "Connexion à {addr} perdue : reconnexion…",
+    "stream.reconnected": "Reconnecté : la diffusion reprend.",
+    "stream.lost": (
+        "Impossible de se reconnecter à {addr} en une minute. Vérifie que le casque est allumé "
+        "et sur le même Wi-Fi, puis appuie sur Espace. Après un redémarrage, relance "
+        "l'assistant (W)."
+    ),
     "stream.crashed": "scrcpy s'est arrêté (code {code}). Voir le journal sur l'accueil.",
     "lang.changed": "Langue réglée sur {lang}. Relance l'app pour l'appliquer.",
     "preset.quest3": "Meta Quest 3 (un œil, redressé)",
@@ -268,6 +282,7 @@ FR: dict[str, str] = {
     "home.status.idle": "○ Non connecté",
     "home.status.connecting": "… Connexion à {addr}",
     "home.status.connected": "● Connecté à {addr}",
+    "home.status.reconnecting": "… Connexion perdue, reconnexion à {addr} (Espace pour arrêter)",
     "home.status.streaming": (
         "▶ Diffusion depuis {addr}\n"
         "Dans la fenêtre scrcpy : Alt+F bascule le plein écran, fermer la fenêtre arrête la diffusion.\n"
