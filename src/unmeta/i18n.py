@@ -30,6 +30,29 @@ EN: dict[str, str] = {
         "The headset refused the connection. Put it on, accept the debugging prompt, then retry."
     ),
     "stream.ended": "Streaming ended.",
+    "hint.unauthorized": (
+        'The headset refused the connection: put it on and accept "Allow USB debugging" '
+        '(tick "Always allow"), then press Space.'
+    ),
+    "hint.offline": (
+        "The headset does not answer: it may be asleep (put it on to wake it up) "
+        "or on another Wi-Fi network."
+    ),
+    "hint.encoder": (
+        "The headset could not encode the video at this size. In Display settings (D), "
+        "set a max size such as 1920, or turn the crop back on."
+    ),
+    "hint.audio": (
+        "The headset's sound could not be captured. In Display settings (D), try the audio "
+        'mode "PC only", or turn audio off.'
+    ),
+    "hint.record": (
+        "The recording file could not be written. In Display settings (D), choose another "
+        'file name, or leave "Record to file" empty.'
+    ),
+    "hint.window": (
+        "The video window could not open. Update the graphics driver, or restart the computer."
+    ),
     "stream.reconnecting": "Connection to {addr} lost: reconnecting…",
     "stream.reconnected": "Reconnected: streaming again.",
     "stream.lost": (
@@ -256,6 +279,30 @@ FR: dict[str, str] = {
         "Le casque a refusé la connexion. Mets-le, accepte la demande de débogage, puis réessaie."
     ),
     "stream.ended": "Diffusion terminée.",
+    "hint.unauthorized": (
+        "Le casque refuse la connexion : mets-le et accepte « Autoriser le débogage USB » "
+        "(coche « Toujours autoriser »), puis appuie sur Espace."
+    ),
+    "hint.offline": (
+        "Le casque ne répond pas : il est peut-être en veille (mets-le pour le réveiller) "
+        "ou sur un autre réseau Wi-Fi."
+    ),
+    "hint.encoder": (
+        "Le casque n'arrive pas à encoder la vidéo à cette taille. Dans Réglages d'affichage "
+        "(D), mets une taille max comme 1920, ou réactive le recadrage."
+    ),
+    "hint.audio": (
+        "Le son du casque n'a pas pu être capturé. Dans Réglages d'affichage (D), essaie le "
+        "mode audio « PC uniquement », ou coupe l'audio."
+    ),
+    "hint.record": (
+        "Impossible d'écrire le fichier d'enregistrement. Dans Réglages d'affichage (D), "
+        "choisis un autre nom de fichier, ou laisse « Enregistrer dans » vide."
+    ),
+    "hint.window": (
+        "La fenêtre vidéo n'a pas pu s'ouvrir. Mets à jour le pilote graphique, ou redémarre "
+        "l'ordinateur."
+    ),
     "stream.reconnecting": "Connexion à {addr} perdue : reconnexion…",
     "stream.reconnected": "Reconnecté : la diffusion reprend.",
     "stream.lost": (
