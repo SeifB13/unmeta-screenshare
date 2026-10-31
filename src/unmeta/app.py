@@ -6,7 +6,7 @@ from pathlib import Path
 from textual import work
 from textual.app import App
 
-from . import APP_NAME, __version__, config, tools
+from . import APP_NAME, __version__, config, diagnostic, tools
 from .adb import Adb
 from .config import Config, DisplaySettings, Profile
 from .i18n import t
@@ -87,6 +87,41 @@ class UnMetaApp(App[None]):
     @work(thread=True, exclusive=True, group="stream")
     def stop_stream(self) -> None:
         self.runner.stop()
+
+    # Diagnostic ----------------------------------------------------------------------
+
+    def action_copy_diagnostic(self) -> None:
+        self.notify(t("diag.working"))
+        self._collect_diagnostic()
+
+    @work(thread=True, exclusive=True, group="diagnostic")
+    def _collect_diagnostic(self) -> None:
+        profile = self.config.current
+        headset = (
+            diagnostic.headset_info(self.adb, profile.address) if self.adb and profile else None
+        )
+        report = diagnostic.build_report(self.tools, profile, headset, self.output)
+        path = (self.config_path or config.default_path()).with_name("diagnostic.txt")
+        try:
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(report, encoding="utf-8")
+        except OSError:
+            path = None
+        copied = diagnostic.copy_to_clipboard(report)
+        self.call_from_thread(self._diagnostic_done, report, copied, path)
+
+    def _diagnostic_done(self, report: str, copied: bool, path: Path | None) -> None:
+        if not copied:
+            self.copy_to_clipboard(report)  # terminal clipboard (OSC 52), when supported
+        if copied:
+            text = t("diag.copied")
+        elif path:
+            text = t("diag.saved", path=path)
+        else:
+            text = t("diag.failed")
+        if copied and path:
+            text += "\n" + t("diag.also_saved", path=path)
+        self.notify(text, timeout=15)
 
     def adopt_frame(self, profile: Profile, frame: tuple[int, int]) -> None:
         """Record the headset's frame size; a crop still on its preset is rescaled to it."""

@@ -98,6 +98,7 @@ Turn the headset on, start the app, press **Space**.
 | D | Display settings |
 | W | Setup wizard |
 | L | Switch language |
+| I | Copy a diagnostic report |
 | ? | Help |
 | Q | Quit |
 
@@ -120,6 +121,8 @@ While streaming, changes apply by themselves after a short pause. scrcpy cannot 
 Settings are saved per headset in `config.json` (`unmeta --print-config-path` shows where).
 
 ## Troubleshooting
+
+To report a problem, press `I` on the home screen: a report (versions, headset, settings, recent log, no serial number) is copied to the clipboard, ready to paste.
 
 - **Cannot reach the headset**: it is asleep, on another network, or it rebooted (redo the setup with the cable).
 - **No debugging prompt**: unplug and replug the cable; check developer mode; try another cable.
