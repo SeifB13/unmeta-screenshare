@@ -1,5 +1,5 @@
 from unmeta.config import DisplaySettings
-from unmeta.scrcpy import build_args
+from unmeta.scrcpy import build_args, parse_texture
 
 ADDR = "192.168.1.80:5555"
 
@@ -31,3 +31,9 @@ def test_optional_flags():
     assert "--fullscreen" not in args
     for flag in ("--always-on-top", "--max-size=1280", "--record=out.mp4", "--window-title=Quest"):
         assert flag in args
+
+
+def test_parse_texture():
+    assert parse_texture("INFO: Texture (D3D11VA): 1904x1408") == (1904, 1408)
+    assert parse_texture("INFO: Texture: 3664x1920") == (3664, 1920)
+    assert parse_texture("INFO: Renderer: direct3d11") is None

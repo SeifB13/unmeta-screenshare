@@ -72,6 +72,16 @@ def parse_ip_route(output: str) -> str | None:
     return None
 
 
+def parse_wm_size(output: str) -> tuple[int, int] | None:
+    """Parse `wm size`, preferring the override size when one is set."""
+    sizes = dict(re.findall(r"(Physical|Override) size: (\d+x\d+)", output))
+    size = sizes.get("Override") or sizes.get("Physical")
+    if not size:
+        return None
+    w, h = size.split("x")
+    return int(w), int(h)
+
+
 def classify_connect(output: str) -> str:
     """Map `adb connect` output to ok | unauthorized | unreachable."""
     text = output.lower()
@@ -144,6 +154,10 @@ class Adb:
             return ip
         code, out = self.run("shell", "ip", "route", serial=serial)
         return parse_ip_route(out) if code == 0 else None
+
+    def display_size(self, serial: str) -> tuple[int, int] | None:
+        code, out = self.run("shell", "wm", "size", serial=serial, timeout=10)
+        return parse_wm_size(out) if code == 0 else None
 
     def tcpip(self, serial: str, port: int) -> tuple[bool, str]:
         code, out = self.run("tcpip", str(port), serial=serial)

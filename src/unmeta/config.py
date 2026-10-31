@@ -4,13 +4,13 @@ from __future__ import annotations
 
 import json
 import os
-from dataclasses import asdict, dataclass, field, fields
+from dataclasses import asdict, dataclass, field, fields, replace
 from pathlib import Path
 from typing import Any
 
 from platformdirs import user_config_dir
 
-from .presets import DEFAULT_PRESET, PRESETS
+from .presets import DEFAULT_PRESET, PRESETS, Size
 
 DEFAULT_PORT = 5555
 AUDIO_MODES = ("off", "pc", "dup")
@@ -33,13 +33,23 @@ class DisplaySettings:
     always_on_top: bool = False
     record_path: str = ""
 
-    def apply_preset(self, key: str) -> None:
+    def apply_preset(self, key: str, frame: Size | None = None) -> None:
         preset = PRESETS[key]
+        crop = preset.crop_for(frame)
         self.preset = key
         self.angle = preset.angle
-        self.crop_enabled = preset.crop is not None
-        if preset.crop:
-            self.crop_w, self.crop_h, self.crop_x, self.crop_y = preset.crop
+        self.crop_enabled = crop is not None
+        if crop:
+            self.crop_w, self.crop_h, self.crop_x, self.crop_y = crop
+
+    def follows_preset(self, frame: Size | None) -> bool:
+        """True if crop and angle are still those of the preset for `frame` (not hand-tuned)."""
+        if self.preset not in PRESETS:
+            return False
+        expected = replace(self)
+        expected.apply_preset(self.preset, frame)
+        keys = ("crop_enabled", "crop_w", "crop_h", "crop_x", "crop_y", "angle")
+        return all(getattr(self, k) == getattr(expected, k) for k in keys)
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> DisplaySettings:
@@ -57,11 +67,28 @@ class Profile:
     port: int = DEFAULT_PORT
     serial: str = ""  # hardware serial seen over USB, kept to recognise the headset
     model: str = ""
+    frame_w: int = 0  # raw frame size reported by the headset, 0 = not seen yet
+    frame_h: int = 0
     display: DisplaySettings = field(default_factory=DisplaySettings)
 
     @property
     def address(self) -> str:
         return f"{self.host}:{self.port}"
+
+    @property
+    def frame(self) -> Size | None:
+        return (self.frame_w, self.frame_h) if self.frame_w > 0 and self.frame_h > 0 else None
+
+    def update_frame(self, frame: Size) -> bool:
+        """Record the headset's frame size. A crop left on its preset follows the new size;
+        a hand-tuned one is kept. Return True if anything changed."""
+        if frame == self.frame:
+            return False
+        follows = self.display.follows_preset(self.frame)
+        self.frame_w, self.frame_h = frame
+        if follows:
+            self.display.apply_preset(self.display.preset, frame)
+        return True
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> Profile:
@@ -71,6 +98,8 @@ class Profile:
             port=int(data.get("port", DEFAULT_PORT)),
             serial=str(data.get("serial", "")),
             model=str(data.get("model", "")),
+            frame_w=int(data.get("frame_w", 0)),
+            frame_h=int(data.get("frame_h", 0)),
             display=DisplaySettings.from_dict(data.get("display", {})),
         )
 

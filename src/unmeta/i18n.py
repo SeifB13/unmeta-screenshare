@@ -52,7 +52,8 @@ EN: dict[str, str] = {
     "home.status.connected": "● Connected to {addr}",
     "home.status.streaming": (
         "▶ Streaming from {addr}\n"
-        "In the scrcpy window: Alt+F toggles fullscreen, closing the window stops streaming."
+        "In the scrcpy window: Alt+F toggles fullscreen, closing the window stops streaming.\n"
+        "Image badly framed? Press D (display settings), then V to see the whole image."
     ),
     "home.status.no_profile": "No headset saved yet: press W to start the setup wizard.",
     "home.log": "scrcpy output",
@@ -164,8 +165,10 @@ EN: dict[str, str] = {
     "tuning.pad": (
         "[b]Live adjust[/b] (click or Tab here)\n\n"
         "←↑↓→        move the crop\n"
+        "Ctrl+←↑↓→   move by 50 px\n"
         "Shift+←↑↓→  resize the crop\n"
         "+ / -       rotate\n"
+        "V / F6      full frame on/off\n"
         "Enter       apply\n\n"
         "Steps: 10 px, 1°. Each change restarts scrcpy (1-2 s)."
     ),
@@ -176,6 +179,12 @@ EN: dict[str, str] = {
     "tuning.key.apply": "Apply",
     "tuning.key.reset": "Reset",
     "tuning.saved": "Settings saved.",
+    "tuning.key.full_view": "Full frame",
+    "tuning.map.unknown": "Frame size unknown. Connect the headset, or show the full frame once.",
+    "tuning.map.size": "Raw frame: {w}×{h}",
+    "tuning.map.crop": "Crop: {w}×{h} at x={x}, y={y}",
+    "tuning.map.outside": "⚠ The crop goes past the edge of the frame.",
+    "tuning.map.full_view": "Full frame shown: find the eye, then fit the rectangle on it.",
     # Help
     "help.title": "Help",
     "help.body": (
@@ -203,8 +212,9 @@ EN: dict[str, str] = {
         "## Troubleshooting\n\n"
         "- **Cannot reach the headset**: it is asleep, on another network, or rebooted "
         "(redo the setup with the cable).\n"
-        "- **Image off-center or tilted**: open *Display settings* and move the crop "
-        "or change the angle. Crop and angle depend on each other.\n"
+        "- **Image off-center or tilted**: open *Display settings* (D), press V to see "
+        "the whole image, place the rectangle on the eye, then press V again. "
+        "Crop and angle depend on each other.\n"
         "- **No sound**: audio capture needs Android 11+ on the headset; try *PC only*.\n"
         "- **Choppy video**: lower the bitrate or the max FPS, or move closer to the router.\n"
         "- To turn Wi-Fi ADB off without rebooting, run `adb usb` with the cable plugged in."
@@ -252,7 +262,8 @@ FR: dict[str, str] = {
     "home.status.connected": "● Connecté à {addr}",
     "home.status.streaming": (
         "▶ Diffusion depuis {addr}\n"
-        "Dans la fenêtre scrcpy : Alt+F bascule le plein écran, fermer la fenêtre arrête la diffusion."
+        "Dans la fenêtre scrcpy : Alt+F bascule le plein écran, fermer la fenêtre arrête la diffusion.\n"
+        "Image mal cadrée ? Appuie sur D (réglages d'affichage), puis sur V pour voir l'image entière."
     ),
     "home.status.no_profile": "Aucun casque enregistré : appuie sur W pour lancer l'assistant.",
     "home.log": "Sortie de scrcpy",
@@ -363,8 +374,10 @@ FR: dict[str, str] = {
     "tuning.pad": (
         "[b]Réglage en direct[/b] (clic ou Tab ici)\n\n"
         "←↑↓→        déplacer le recadrage\n"
+        "Ctrl+←↑↓→   déplacer de 50 px\n"
         "Maj+←↑↓→    redimensionner\n"
         "+ / -       pivoter\n"
+        "V / F6      image complète oui/non\n"
         "Entrée      appliquer\n\n"
         "Pas : 10 px, 1°. Chaque changement relance scrcpy (1-2 s)."
     ),
@@ -375,6 +388,14 @@ FR: dict[str, str] = {
     "tuning.key.apply": "Appliquer",
     "tuning.key.reset": "Réinitialiser",
     "tuning.saved": "Réglages enregistrés.",
+    "tuning.key.full_view": "Image complète",
+    "tuning.map.unknown": (
+        "Taille de l'image inconnue. Connecte le casque ou affiche une fois l'image complète."
+    ),
+    "tuning.map.size": "Image brute : {w}×{h}",
+    "tuning.map.crop": "Recadrage : {w}×{h} à x={x}, y={y}",
+    "tuning.map.outside": "⚠ Le recadrage dépasse le bord de l'image.",
+    "tuning.map.full_view": "Image complète affichée : repère l'œil, puis places-y le rectangle.",
     "help.title": "Aide",
     "help.body": (
         "# Aide\n\n"
@@ -401,8 +422,9 @@ FR: dict[str, str] = {
         "## Dépannage\n\n"
         "- **Casque injoignable** : il est en veille, sur un autre réseau, ou a redémarré "
         "(refais l'assistant avec le câble).\n"
-        "- **Image décentrée ou penchée** : ouvre *Réglages d'affichage* et déplace le "
-        "recadrage ou change l'angle. Les deux sont liés.\n"
+        "- **Image décentrée ou penchée** : ouvre *Réglages d'affichage* (D), appuie sur V "
+        "pour voir toute l'image, place le rectangle sur l'œil, puis rappuie sur V. "
+        "Recadrage et angle sont liés.\n"
         "- **Pas de son** : la capture audio nécessite Android 11+ sur le casque ; essaie "
         "*PC uniquement*.\n"
         "- **Vidéo saccadée** : baisse le débit ou les IPS max, ou rapproche-toi de la box.\n"

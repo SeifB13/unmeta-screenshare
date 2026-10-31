@@ -12,6 +12,7 @@ from .config import Config, DisplaySettings, Profile
 from .i18n import t
 from .scrcpy import ScrcpyRunner, build_args, format_command
 from .screens.home import HomeScreen
+from .screens.tuning import TuningScreen
 from .screens.wizard import WizardScreen
 
 CSS = """
@@ -31,6 +32,8 @@ Input.port { width: 12; }
 
 class UnMetaApp(App[None]):
     TITLE = APP_NAME
+    # Textual's Ctrl+P palette only offers themes and the like: noise for this app's users.
+    ENABLE_COMMAND_PALETTE = False
     SUB_TITLE = f"v{__version__}"
     CSS = CSS
 
@@ -72,6 +75,9 @@ class UnMetaApp(App[None]):
             return
         if not self.ensure_connected(profile):
             return
+        frame = self.adb.display_size(profile.address)
+        if frame and settings is None:
+            self.call_from_thread(self.adopt_frame, profile, frame)
         args = build_args(
             profile.address, settings or profile.display, f"{APP_NAME} · {profile.name}"
         )
@@ -81,6 +87,11 @@ class UnMetaApp(App[None]):
     @work(thread=True, exclusive=True, group="stream")
     def stop_stream(self) -> None:
         self.runner.stop()
+
+    def adopt_frame(self, profile: Profile, frame: tuple[int, int]) -> None:
+        """Record the headset's frame size; a crop still on its preset is rescaled to it."""
+        if profile.update_frame(frame):
+            self.save_config()
 
     def ensure_connected(self, profile: Profile) -> bool:
         """Connect if needed. Blocking: call from a worker thread."""
@@ -103,6 +114,8 @@ class UnMetaApp(App[None]):
         for screen in self.screen_stack:
             if isinstance(screen, HomeScreen):
                 screen.write_log(line)
+            elif isinstance(screen, TuningScreen):
+                screen.scrcpy_line(line)
 
     def _on_scrcpy_output(self, line: str) -> None:
         self.call_from_thread(self.append_output, line)

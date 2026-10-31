@@ -17,16 +17,16 @@ ruff check . && ruff format --check .
 python -m unmeta [--lang fr] [--config path]       # run the app
 ```
 
-Windows build: `pip install -e ".[build]"`, `python packaging/windows/fetch_scrcpy.py` (fills `vendor/scrcpy/`), `pyinstaller packaging/windows/unmeta.spec --noconfirm`, then `iscc /DAppVersion=X.Y.Z packaging/windows/installer.iss` (Inno Setup 6; CI does it). Releases: push a `vX.Y.Z` tag matching `__version__` in `src/unmeta/__init__.py`; `release.yml` makes a draft GitHub release.
+Windows build: `pip install -e ".[build]"`, `python packaging/windows/fetch_scrcpy.py` (fills `vendor/scrcpy/`), `pyinstaller packaging/windows/unmeta.spec --noconfirm`, then `iscc /DAppVersion=X.Y.Z packaging/windows/installer.iss` (Inno Setup 6; CI does it). The logo source is `assets/logo.svg`; `assets/logo.png` and `packaging/windows/unmeta.ico` (exe and installer icon) are renders of it. Releases: push a `vX.Y.Z` tag matching `__version__` in `src/unmeta/__init__.py`; `release.yml` makes a draft GitHub release.
 
 ## Architecture
 
 - `adb.py`: subprocess wrapper plus pure parsers (`parse_devices`, `parse_ip_addr`, `parse_ip_route`, `classify_connect`) that the tests cover. `Adb._ensure_server` starts the adb daemon with DEVNULL handles first, otherwise the first captured adb call hangs on Windows.
 - `scrcpy.py`: `build_args(serial, DisplaySettings)` and `ScrcpyRunner` (one child process, output/exit callbacks on a reader thread, `ADB` env var set so scrcpy uses our adb). scrcpy cannot change crop/angle/audio live, so "apply" means restart.
-- `config.py`: `Config` → `Profile` (headset address, serial, model) → `DisplaySettings`, JSON in the platformdirs user config dir. Loading tolerates unknown keys and broken files.
-- `presets.py`: per-model crop and angle. Only Quest 3 is verified (`1900:1400:100:300`, 20°); crop and angle depend on each other.
+- `config.py`: `Config` → `Profile` (headset address, serial, model, raw frame size) → `DisplaySettings`, JSON in the platformdirs user config dir. Loading tolerates unknown keys and broken files.
+- `presets.py`: per-model crop and angle. Only Quest 3 is verified (`1900:1400:100:300`, 20°, on its 4128x2208 frame); crop and angle depend on each other. Crops are scaled to the frame size the headset reports (`wm size`, read at each stream start and saved in the profile); `Profile.update_frame` rescales a crop still on its preset and keeps a hand-tuned one.
 - `tools.py`: finds adb/scrcpy in the bundled `vendor/scrcpy` (frozen: `sys._MEIPASS/vendor/scrcpy`) then `PATH`; requires scrcpy ≥ 3.0 (`--angle`).
-- `app.py` + `screens/`: `UnMetaApp` owns config, tools, `Adb`, `ScrcpyRunner`, and the `start_stream`/`stop_stream` thread workers. Screens: `home` (profile, connect, start/stop, log), `wizard` (7 steps; plug/authorize/unplug poll `adb devices` every second), `tuning` (form + `NudgePad` arrow-key panel, debounced auto-apply, windowed preview), `help`.
+- `app.py` + `screens/`: `UnMetaApp` owns config, tools, `Adb`, `ScrcpyRunner`, and the `start_stream`/`stop_stream` thread workers. Screens: `home` (profile, connect, start/stop, log), `wizard` (7 steps; plug/authorize/unplug poll `adb devices` every second), `tuning` (form + `NudgePad` arrow-key panel, `FrameMap` drawing the raw frame and crop, V/F6 uncropped preview, debounced auto-apply, windowed preview), `help`.
 
 ## Conventions
 

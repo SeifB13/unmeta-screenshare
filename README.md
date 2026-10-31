@@ -1,3 +1,5 @@
+<img src="assets/logo.png" alt="" width="96" align="right">
+
 # UnMeta Screenshare
 
 **Mirror your Meta Quest's view and sound to your computer over Wi-Fi, without the Meta casting app.**
@@ -23,7 +25,7 @@ UnMeta Screenshare is a small terminal app for Windows, macOS and Linux. A step-
 Quest  ──(adb over Wi-Fi, port 5555)──>  your computer  ──>  scrcpy window + sound
 ```
 
-The Quest renders a side-by-side image for both eyes. The default *Meta Quest 3* preset crops one eye out of it and straightens its tilt, giving a normal flat picture.
+The Quest renders a side-by-side image for both eyes. The default *Meta Quest 3* preset crops one eye out of it and straightens its tilt, giving a normal flat picture. The crop is scaled to the image size the headset reports, so there is nothing to measure by hand.
 
 ## Requirements
 
@@ -101,12 +103,14 @@ Turn the headset on, start the app, press **Space**.
 
 ## Display settings
 
-Press `D`. Focus the *Live adjust* panel, then:
+Press `D`. A map shows the headset's whole image with the crop rectangle on it (red where the crop goes past the edge). Focus the *Live adjust* panel, then:
 
 | Key | Action |
 |---|---|
 | ← ↑ ↓ → | Move the crop (10 px) |
+| Ctrl + arrows | Move the crop faster (50 px) |
 | Shift + arrows | Resize the crop |
+| V or F6 | Full frame on/off: see the whole image to find the eye |
 | + / - | Rotate (1°) |
 | Enter or F5 | Apply |
 | Ctrl+R | Reset to the preset |
@@ -119,7 +123,7 @@ Settings are saved per headset in `config.json` (`unmeta --print-config-path` sh
 
 - **Cannot reach the headset**: it is asleep, on another network, or it rebooted (redo the setup with the cable).
 - **No debugging prompt**: unplug and replug the cable; check developer mode; try another cable.
-- **Picture off-center or tilted**: adjust the crop and the angle together.
+- **Picture off-center or tilted**: in *Display settings*, press V to see the whole image, place the rectangle on the eye, press V again. Crop and angle depend on each other.
 - **No sound**: try the *PC only* audio mode.
 - **Choppy video**: lower the bitrate or the max FPS, or move closer to the router.
 

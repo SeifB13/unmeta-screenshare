@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <!-- UnMeta Screenshare: a headset whose left eye is framed, as the app crops one eye. -->
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#2b3380"/>
+      <stop offset="1" stop-color="#121633"/>
+    </linearGradient>
+    <mask id="visor-cut">
+      <rect width="256" height="256" fill="#fff"/>
+      <ellipse cx="128" cy="186" rx="22" ry="24" fill="#000"/>
+    </mask>
+  </defs>
+  <rect x="8" y="8" width="240" height="240" rx="56" fill="url(#bg)"/>
+  <!-- strap stubs -->
+  <rect x="22" y="116" width="26" height="28" rx="10" fill="#c9cde6"/>
+  <rect x="208" y="116" width="26" height="28" rx="10" fill="#c9cde6"/>
+  <!-- visor with a nose cut-out -->
+  <rect x="38" y="80" width="180" height="104" rx="46" fill="#f4f5fb" mask="url(#visor-cut)"/>
+  <!-- lenses -->
+  <circle cx="90" cy="130" r="27" fill="#161a3d"/>
+  <circle cx="166" cy="130" r="27" fill="#161a3d"/>
+  <circle cx="90" cy="130" r="13" fill="#ffa62b"/>
+  <!-- crop corners around the left eye -->
+  <g fill="none" stroke="#ffa62b" stroke-width="9" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M52 112 V92 H72"/>
+    <path d="M108 92 H128 V112"/>
+    <path d="M52 148 V168 H72"/>
+    <path d="M108 168 H128 V148"/>
+  </g>
+</svg>

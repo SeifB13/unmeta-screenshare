@@ -25,6 +25,7 @@ exe = EXE(
     exclude_binaries=True,
     name="unmeta",
     console=True,  # terminal app
+    icon=str(root / "packaging" / "windows" / "unmeta.ico"),
     upx=False,
 )
 coll = COLLECT(exe, a.binaries, a.datas, name="unmeta", upx=False)
