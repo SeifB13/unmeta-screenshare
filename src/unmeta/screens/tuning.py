@@ -16,7 +16,7 @@ from textual.widgets import Button, Footer, Header, Input, Label, Select, Static
 
 from ..config import AUDIO_MODES, DisplaySettings, Profile
 from ..i18n import t
-from ..presets import PRESETS
+from ..presets import PRESETS, Rect, Size
 from ..scrcpy import build_args, format_command, parse_texture
 
 if TYPE_CHECKING:
@@ -69,10 +69,7 @@ class NudgePad(Static, can_focus=True):
     ]
 
 
-Rect = tuple[int, int, int, int]  # width, height, x, y
-
-
-def frame_map(frame: tuple[int, int], crop: Rect, cols: int = MAP_COLS) -> list[str]:
+def frame_map(frame: Size, crop: Rect, cols: int = MAP_COLS) -> list[str]:
     """Draw the raw frame and the crop rectangle as character rows.
 
     `.` frame, `|` middle of the frame (between the two eyes), `#` crop border, `o` inside
@@ -128,7 +125,7 @@ class FrameMap(Static):
     FrameMap { border: round $primary; padding: 0 1; height: auto; margin-bottom: 1; }
     """
 
-    def show(self, frame: tuple[int, int] | None, s: DisplaySettings, full_view: bool) -> None:
+    def show(self, frame: Size | None, s: DisplaySettings, full_view: bool) -> None:
         if frame is None:
             self.update(t("tuning.map.unknown"))
             return
@@ -180,8 +177,8 @@ class TuningScreen(Screen[None]):
         self.auto_apply = True
         self.windowed = True
         self.full_view = False  # stream the raw frame to find the eye; the crop is kept
-        self.frame: tuple[int, int] | None = None  # raw frame size, once known
-        self._frame_from_device = False
+        self.frame: Size | None = profile.frame  # raw frame size, once known
+        self._frame_from_device = self.frame is not None
         self._applied: DisplaySettings | None = None  # what the running preview uses
         self._timer: Timer | None = None
 
@@ -260,10 +257,14 @@ class TuningScreen(Screen[None]):
         if size:
             self.app.call_from_thread(self._set_frame, size, True)
 
-    def _set_frame(self, size: tuple[int, int], from_device: bool) -> None:
+    def _set_frame(self, size: Size, from_device: bool) -> None:
         # The crop is in headset pixels, so `wm size` wins. scrcpy's video size is only a
         # fallback: it may be scaled down (a Quest 3 frame, 4128 px, is too wide for most
         # encoders) or rounded.
+        if from_device and self.profile.update_frame(size):
+            self._sync_inputs()  # a crop still on its preset was rescaled
+            self.app.save_config()
+            self._changed()
         if from_device or not self._frame_from_device:
             self.frame = size
             self._frame_from_device = from_device
@@ -350,7 +351,7 @@ class TuningScreen(Screen[None]):
         if not isinstance(event.value, str):
             return
         if event.select.id == "preset" and event.value != self.s.preset:
-            self.s.apply_preset(event.value)
+            self.s.apply_preset(event.value, self.profile.frame)
             self._sync_inputs()
             self._changed()
         elif event.select.id == "audio" and event.value != self.s.audio:
@@ -387,7 +388,7 @@ class TuningScreen(Screen[None]):
 
     def action_reset(self) -> None:
         key = self.s.preset if self.s.preset in PRESETS else next(iter(PRESETS))
-        self.s.apply_preset(key)
+        self.s.apply_preset(key, self.profile.frame)
         self.query_one("#preset", Select).value = key
         self._sync_inputs()
         self._changed()

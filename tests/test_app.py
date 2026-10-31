@@ -101,6 +101,7 @@ async def test_tuning_full_view_streams_raw_frame(make_app, monkeypatch):
         await app.workers.wait_for_complete()
         await pilot.pause()
         assert screen.frame == (4128, 2208)  # the headset's own size wins
+        assert cfg.profiles["Q"].frame == (4128, 2208)  # remembered for next time
         app.append_output("INFO: Texture (D3D11VA): 1920x1026")
         assert screen.frame == (4128, 2208)
         await pilot.press("ctrl+right")

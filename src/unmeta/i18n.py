@@ -52,7 +52,8 @@ EN: dict[str, str] = {
     "home.status.connected": "● Connected to {addr}",
     "home.status.streaming": (
         "▶ Streaming from {addr}\n"
-        "In the scrcpy window: Alt+F toggles fullscreen, closing the window stops streaming."
+        "In the scrcpy window: Alt+F toggles fullscreen, closing the window stops streaming.\n"
+        "Image badly framed? Press D (display settings), then V to see the whole image."
     ),
     "home.status.no_profile": "No headset saved yet: press W to start the setup wizard.",
     "home.log": "scrcpy output",
@@ -260,7 +261,8 @@ FR: dict[str, str] = {
     "home.status.connected": "● Connecté à {addr}",
     "home.status.streaming": (
         "▶ Diffusion depuis {addr}\n"
-        "Dans la fenêtre scrcpy : Alt+F bascule le plein écran, fermer la fenêtre arrête la diffusion."
+        "Dans la fenêtre scrcpy : Alt+F bascule le plein écran, fermer la fenêtre arrête la diffusion.\n"
+        "Image mal cadrée ? Appuie sur D (réglages d'affichage), puis sur V pour voir l'image entière."
     ),
     "home.status.no_profile": "Aucun casque enregistré : appuie sur W pour lancer l'assistant.",
     "home.log": "Sortie de scrcpy",
@@ -387,12 +389,12 @@ FR: dict[str, str] = {
     "tuning.saved": "Réglages enregistrés.",
     "tuning.key.full_view": "Image complète",
     "tuning.map.unknown": (
-        "Taille de l'image inconnue. Connectez le casque ou affichez une fois l'image complète."
+        "Taille de l'image inconnue. Connecte le casque ou affiche une fois l'image complète."
     ),
     "tuning.map.size": "Image brute : {w}×{h}",
     "tuning.map.crop": "Recadrage : {w}×{h} à x={x}, y={y}",
     "tuning.map.outside": "⚠ Le recadrage dépasse le bord de l'image.",
-    "tuning.map.full_view": "Image complète affichée : repérez l'œil, puis placez-y le rectangle.",
+    "tuning.map.full_view": "Image complète affichée : repère l'œil, puis places-y le rectangle.",
     "help.title": "Aide",
     "help.body": (
         "# Aide\n\n"

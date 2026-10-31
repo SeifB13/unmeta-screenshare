@@ -73,6 +73,9 @@ class UnMetaApp(App[None]):
             return
         if not self.ensure_connected(profile):
             return
+        frame = self.adb.display_size(profile.address)
+        if frame and settings is None:
+            self.call_from_thread(self.adopt_frame, profile, frame)
         args = build_args(
             profile.address, settings or profile.display, f"{APP_NAME} · {profile.name}"
         )
@@ -82,6 +85,11 @@ class UnMetaApp(App[None]):
     @work(thread=True, exclusive=True, group="stream")
     def stop_stream(self) -> None:
         self.runner.stop()
+
+    def adopt_frame(self, profile: Profile, frame: tuple[int, int]) -> None:
+        """Record the headset's frame size; a crop still on its preset is rescaled to it."""
+        if profile.update_frame(frame):
+            self.save_config()
 
     def ensure_connected(self, profile: Profile) -> bool:
         """Connect if needed. Blocking: call from a worker thread."""
