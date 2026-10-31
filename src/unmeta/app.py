@@ -8,7 +8,7 @@ from textual import work
 from textual.app import App
 from textual.worker import get_current_worker
 
-from . import APP_NAME, __version__, config, diagnostic, tools
+from . import APP_NAME, __version__, config, diagnostic, hints, tools
 from .adb import Adb
 from .config import Config, DisplaySettings, Profile
 from .i18n import t
@@ -56,6 +56,7 @@ class UnMetaApp(App[None]):
         self.reconnecting = False
         self._stream: tuple[Profile, DisplaySettings | None] | None = None  # what runs now
         self._started_at = 0.0
+        self._hints_shown: set[str] = set()  # hints already shown for this stream
 
     def set_tools(self, found: tools.Tools) -> None:
         self.tools = found
@@ -99,6 +100,7 @@ class UnMetaApp(App[None]):
         )
         self.call_from_thread(self.append_output, f"$ {format_command(args)}")
         self._stream = (profile, settings)
+        self.call_from_thread(self._hints_shown.clear)
         self._started_at = time.monotonic()
         self.runner.start(self.tools.scrcpy, args, adb_path=self.tools.adb)
 
@@ -203,7 +205,14 @@ class UnMetaApp(App[None]):
                 screen.scrcpy_line(line)
 
     def _on_scrcpy_output(self, line: str) -> None:
-        self.call_from_thread(self.append_output, line)
+        self.call_from_thread(self._scrcpy_line, line)
+
+    def _scrcpy_line(self, line: str) -> None:
+        self.append_output(line)
+        key = hints.explain(line)
+        if key and key not in self._hints_shown:
+            self._hints_shown.add(key)
+            self.notify(t(key), severity="warning", timeout=20)
 
     def _on_scrcpy_exit(self, code: int, intentional: bool) -> None:
         if intentional:  # we stopped it, maybe to restart it: _stream is already the new one
