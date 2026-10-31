@@ -13,7 +13,7 @@ UnMeta Screenshare is a small terminal app for Windows, macOS and Linux. A step-
 ## Features
 
 - **Guided setup**: plug in, allow USB debugging, enable Wi-Fi ADB, read the IP, unplug, connect. Each step explains what to do and moves on by itself when it detects the headset.
-- **One-key streaming**: press Space on the home screen.
+- **One-key streaming**: press Space on the home screen. If the Wi-Fi drops, the app reconnects and restarts the stream by itself (for up to a minute).
 - **Live display settings**: move or resize the crop with the arrow keys, rotate with + / -, change the audio, frame rate, bitrate, window mode. scrcpy restarts in about a second to show each change.
 - **Audio**: off, PC only, or headset + PC at the same time.
 - **Saved headsets**: several headsets, each with its address and display settings.

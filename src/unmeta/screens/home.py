@@ -120,9 +120,11 @@ class HomeScreen(Screen[None]):
 
     def update_status(self) -> None:
         profile = self.app.config.current
-        streaming = self.app.runner.running
+        streaming = self.app.runner.running or self.app.reconnecting
         if profile is None:
             text = t("home.status.no_profile")
+        elif self.app.reconnecting:
+            text = t("home.status.reconnecting", addr=profile.address)
         elif streaming:
             text = t("home.status.streaming", addr=profile.address)
         else:
@@ -146,7 +148,7 @@ class HomeScreen(Screen[None]):
             actions[event.button.id]()
 
     def action_toggle_stream(self) -> None:
-        if self.app.runner.running:
+        if self.app.runner.running or self.app.reconnecting:
             self.app.stop_stream()
             return
         profile = self.profile()

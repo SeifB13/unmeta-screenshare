@@ -1,10 +1,12 @@
 from __future__ import annotations
 
+import time
 from collections import deque
 from pathlib import Path
 
 from textual import work
 from textual.app import App
+from textual.worker import get_current_worker
 
 from . import APP_NAME, __version__, config, diagnostic, tools
 from .adb import Adb
@@ -29,6 +31,12 @@ Input.port { width: 12; }
 .muted { color: $text-muted; }
 """
 
+# A stream that ran this long and then stopped on its own lost the connection (Wi-Fi drop,
+# headset asleep): try to get it back. One that dies sooner has a startup problem instead.
+RECONNECT_AFTER_S = 10
+RECONNECT_EVERY_S = 3
+RECONNECT_FOR_S = 60
+
 
 class UnMetaApp(App[None]):
     TITLE = APP_NAME
@@ -45,6 +53,9 @@ class UnMetaApp(App[None]):
         self.adb: Adb | None = None
         self.output: deque[str] = deque(maxlen=500)
         self.runner = ScrcpyRunner(on_output=self._on_scrcpy_output, on_exit=self._on_scrcpy_exit)
+        self.reconnecting = False
+        self._stream: tuple[Profile, DisplaySettings | None] | None = None  # what runs now
+        self._started_at = 0.0
 
     def set_tools(self, found: tools.Tools) -> None:
         self.tools = found
@@ -73,8 +84,13 @@ class UnMetaApp(App[None]):
         if not self.tools.scrcpy_ok or not self.tools.scrcpy:
             self.call_from_thread(self.notify, t("err.no_scrcpy"), severity="error")
             return
-        if not self.ensure_connected(profile):
-            return
+        self.reconnecting = False  # exclusive worker: a reconnection in progress was cancelled
+        if self.ensure_connected(profile):
+            self._launch(profile, settings)
+
+    def _launch(self, profile: Profile, settings: DisplaySettings | None) -> None:
+        """Start scrcpy on a connected headset. Blocking: call from a worker thread."""
+        assert self.adb is not None and self.tools.scrcpy
         frame = self.adb.display_size(profile.address)
         if frame and settings is None:
             self.call_from_thread(self.adopt_frame, profile, frame)
@@ -82,11 +98,43 @@ class UnMetaApp(App[None]):
             profile.address, settings or profile.display, f"{APP_NAME} · {profile.name}"
         )
         self.call_from_thread(self.append_output, f"$ {format_command(args)}")
+        self._stream = (profile, settings)
+        self._started_at = time.monotonic()
         self.runner.start(self.tools.scrcpy, args, adb_path=self.tools.adb)
 
     @work(thread=True, exclusive=True, group="stream")
     def stop_stream(self) -> None:
+        # Exclusive in the "stream" group: also cancels a reconnection in progress.
+        self.reconnecting = False
+        self._stream = None
         self.runner.stop()
+
+    @work(thread=True, exclusive=True, group="stream")
+    def _reconnect(self, profile: Profile, settings: DisplaySettings | None) -> None:
+        assert self.adb is not None
+        worker = get_current_worker()
+        self.reconnecting = True
+        self.call_from_thread(
+            self.notify, t("stream.reconnecting", addr=profile.address), severity="warning"
+        )
+        # adb may still list the dead connection as "device": drop it to really reconnect.
+        self.adb.disconnect(profile.address)
+        deadline = time.monotonic() + RECONNECT_FOR_S
+        try:
+            while time.monotonic() < deadline:
+                time.sleep(RECONNECT_EVERY_S)
+                if worker.is_cancelled:
+                    return
+                if self.ensure_connected(profile, quiet=True):
+                    self._launch(profile, settings)
+                    self.call_from_thread(self.notify, t("stream.reconnected"))
+                    return
+            self.call_from_thread(
+                self.notify, t("stream.lost", addr=profile.address), severity="error", timeout=20
+            )
+        finally:
+            if not worker.is_cancelled:
+                self.reconnecting = False
 
     # Diagnostic ----------------------------------------------------------------------
 
@@ -128,16 +176,18 @@ class UnMetaApp(App[None]):
         if profile.update_frame(frame):
             self.save_config()
 
-    def ensure_connected(self, profile: Profile) -> bool:
+    def ensure_connected(self, profile: Profile, quiet: bool = False) -> bool:
         """Connect if needed. Blocking: call from a worker thread."""
         assert self.adb is not None
         if self.adb.state(profile.address) == "device":
             return True
         status, raw = self.adb.connect(profile.address)
-        if raw:
+        if raw and not quiet:
             self.call_from_thread(self.append_output, raw)
         if status == "ok" and self.adb.state(profile.address) == "device":
             return True
+        if quiet:
+            return False
         key = "err.unauthorized" if status == "unauthorized" else "err.unreachable"
         self.call_from_thread(
             self.notify, t(key, addr=profile.address), severity="error", timeout=10
@@ -156,9 +206,13 @@ class UnMetaApp(App[None]):
         self.call_from_thread(self.append_output, line)
 
     def _on_scrcpy_exit(self, code: int, intentional: bool) -> None:
-        if intentional:
+        if intentional:  # we stopped it, maybe to restart it: _stream is already the new one
             return
-        if code == 0:
+        stream, self._stream = self._stream, None
+        lasted = time.monotonic() - self._started_at
+        if code != 0 and stream and self.adb and lasted >= RECONNECT_AFTER_S:
+            self.call_from_thread(self._reconnect, *stream)
+        elif code == 0:
             self.call_from_thread(self.notify, t("stream.ended"))
         else:
             self.call_from_thread(
