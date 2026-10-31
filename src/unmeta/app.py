@@ -100,7 +100,7 @@ class UnMetaApp(App[None]):
         )
         self.call_from_thread(self.append_output, f"$ {format_command(args)}")
         self._stream = (profile, settings)
-        self.call_from_thread(self._hints_shown.clear)
+        self._hints_shown = set()  # a new set, not .clear(): the UI thread may be reading it
         self._started_at = time.monotonic()
         self.runner.start(self.tools.scrcpy, args, adb_path=self.tools.adb)
 
