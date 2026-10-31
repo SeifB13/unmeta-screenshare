@@ -164,8 +164,10 @@ EN: dict[str, str] = {
     "tuning.pad": (
         "[b]Live adjust[/b] (click or Tab here)\n\n"
         "←↑↓→        move the crop\n"
+        "Ctrl+←↑↓→   move by 50 px\n"
         "Shift+←↑↓→  resize the crop\n"
         "+ / -       rotate\n"
+        "V / F6      full frame on/off\n"
         "Enter       apply\n\n"
         "Steps: 10 px, 1°. Each change restarts scrcpy (1-2 s)."
     ),
@@ -176,6 +178,12 @@ EN: dict[str, str] = {
     "tuning.key.apply": "Apply",
     "tuning.key.reset": "Reset",
     "tuning.saved": "Settings saved.",
+    "tuning.key.full_view": "Full frame",
+    "tuning.map.unknown": "Frame size unknown. Connect the headset, or show the full frame once.",
+    "tuning.map.size": "Raw frame: {w}×{h}",
+    "tuning.map.crop": "Crop: {w}×{h} at x={x}, y={y}",
+    "tuning.map.outside": "⚠ The crop goes past the edge of the frame.",
+    "tuning.map.full_view": "Full frame shown: find the eye, then fit the rectangle on it.",
     # Help
     "help.title": "Help",
     "help.body": (
@@ -363,8 +371,10 @@ FR: dict[str, str] = {
     "tuning.pad": (
         "[b]Réglage en direct[/b] (clic ou Tab ici)\n\n"
         "←↑↓→        déplacer le recadrage\n"
+        "Ctrl+←↑↓→   déplacer de 50 px\n"
         "Maj+←↑↓→    redimensionner\n"
         "+ / -       pivoter\n"
+        "V / F6      image complète oui/non\n"
         "Entrée      appliquer\n\n"
         "Pas : 10 px, 1°. Chaque changement relance scrcpy (1-2 s)."
     ),
@@ -375,6 +385,14 @@ FR: dict[str, str] = {
     "tuning.key.apply": "Appliquer",
     "tuning.key.reset": "Réinitialiser",
     "tuning.saved": "Réglages enregistrés.",
+    "tuning.key.full_view": "Image complète",
+    "tuning.map.unknown": (
+        "Taille de l'image inconnue. Connectez le casque ou affichez une fois l'image complète."
+    ),
+    "tuning.map.size": "Image brute : {w}×{h}",
+    "tuning.map.crop": "Recadrage : {w}×{h} à x={x}, y={y}",
+    "tuning.map.outside": "⚠ Le recadrage dépasse le bord de l'image.",
+    "tuning.map.full_view": "Image complète affichée : repérez l'œil, puis placez-y le rectangle.",
     "help.title": "Aide",
     "help.body": (
         "# Aide\n\n"

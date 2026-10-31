@@ -1,4 +1,10 @@
-from unmeta.adb import classify_connect, parse_devices, parse_ip_addr, parse_ip_route
+from unmeta.adb import (
+    classify_connect,
+    parse_devices,
+    parse_ip_addr,
+    parse_ip_route,
+    parse_wm_size,
+)
 
 DEVICES = """\
 * daemon not running; starting now at tcp:5037
@@ -54,3 +60,9 @@ def test_classify_connect():
     assert classify_connect("failed to connect to '192.168.1.80:5555': Connection refused") == (
         "unreachable"
     )
+
+
+def test_parse_wm_size():
+    assert parse_wm_size("Physical size: 3840x2160") == (3840, 2160)
+    assert parse_wm_size("Physical size: 3840x2160\nOverride size: 1920x1080") == (1920, 1080)
+    assert parse_wm_size("error: device offline") is None

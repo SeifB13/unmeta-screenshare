@@ -7,6 +7,7 @@ restarting it (about 1-2 s; the adb connection stays up).
 from __future__ import annotations
 
 import os
+import re
 import shlex
 import subprocess
 import sys
@@ -39,6 +40,12 @@ def build_args(serial: str, s: DisplaySettings, window_title: str | None = None)
     if s.record_path:
         args.append(f"--record={s.record_path}")
     return args
+
+
+def parse_texture(line: str) -> tuple[int, int] | None:
+    """Size of the decoded video from a scrcpy log line like `INFO: Texture: 1904x1408`."""
+    match = re.search(r"\bTexture\b[^:]*:\s*(\d+)x(\d+)", line)
+    return (int(match.group(1)), int(match.group(2))) if match else None
 
 
 def format_command(args: list[str]) -> str:

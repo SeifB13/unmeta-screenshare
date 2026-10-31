@@ -12,6 +12,7 @@ from .config import Config, DisplaySettings, Profile
 from .i18n import t
 from .scrcpy import ScrcpyRunner, build_args, format_command
 from .screens.home import HomeScreen
+from .screens.tuning import TuningScreen
 from .screens.wizard import WizardScreen
 
 CSS = """
@@ -103,6 +104,8 @@ class UnMetaApp(App[None]):
         for screen in self.screen_stack:
             if isinstance(screen, HomeScreen):
                 screen.write_log(line)
+            elif isinstance(screen, TuningScreen):
+                screen.scrcpy_line(line)
 
     def _on_scrcpy_output(self, line: str) -> None:
         self.call_from_thread(self.append_output, line)

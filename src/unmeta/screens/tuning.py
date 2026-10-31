@@ -5,9 +5,11 @@ from __future__ import annotations
 from dataclasses import replace
 from typing import TYPE_CHECKING
 
+from rich.text import Text
+from textual import work
 from textual.app import ComposeResult
 from textual.binding import Binding
-from textual.containers import Horizontal, Vertical, VerticalScroll
+from textual.containers import Horizontal, VerticalScroll
 from textual.screen import Screen
 from textual.timer import Timer
 from textual.widgets import Button, Footer, Header, Input, Label, Select, Static, Switch
@@ -15,12 +17,14 @@ from textual.widgets import Button, Footer, Header, Input, Label, Select, Static
 from ..config import AUDIO_MODES, DisplaySettings, Profile
 from ..i18n import t
 from ..presets import PRESETS
-from ..scrcpy import build_args, format_command
+from ..scrcpy import build_args, format_command, parse_texture
 
 if TYPE_CHECKING:
     from ..app import UnMetaApp
 
 STEP_PX = 10
+BIG_STEP_PX = 50
+MAP_COLS = 42
 AUTO_APPLY_DELAY = 0.8
 
 # Input id -> (min, max). Ids match DisplaySettings attributes.
@@ -50,6 +54,10 @@ class NudgePad(Static, can_focus=True):
         Binding("right", f"screen.nudge({STEP_PX}, 0)", show=False),
         Binding("up", f"screen.nudge(0, {-STEP_PX})", show=False),
         Binding("down", f"screen.nudge(0, {STEP_PX})", show=False),
+        Binding("ctrl+left", f"screen.nudge({-BIG_STEP_PX}, 0)", show=False),
+        Binding("ctrl+right", f"screen.nudge({BIG_STEP_PX}, 0)", show=False),
+        Binding("ctrl+up", f"screen.nudge(0, {-BIG_STEP_PX})", show=False),
+        Binding("ctrl+down", f"screen.nudge(0, {BIG_STEP_PX})", show=False),
         Binding("shift+left", f"screen.resize({-STEP_PX}, 0)", show=False),
         Binding("shift+right", f"screen.resize({STEP_PX}, 0)", show=False),
         Binding("shift+up", f"screen.resize(0, {-STEP_PX})", show=False),
@@ -57,7 +65,90 @@ class NudgePad(Static, can_focus=True):
         Binding("plus,equals_sign", "screen.rotate(1)", show=False),
         Binding("minus", "screen.rotate(-1)", show=False),
         Binding("enter", "screen.apply", show=False),
+        Binding("v", "screen.full_view", show=False),
     ]
+
+
+Rect = tuple[int, int, int, int]  # width, height, x, y
+
+
+def frame_map(frame: tuple[int, int], crop: Rect, cols: int = MAP_COLS) -> list[str]:
+    """Draw the raw frame and the crop rectangle as character rows.
+
+    `.` frame, `|` middle of the frame (between the two eyes), `#` crop border, `o` inside
+    the crop, `!` part of the crop outside the frame, space outside both. Terminal cells
+    are about twice as tall as wide, hence the halved row count.
+    """
+    fw, fh = frame
+    cw, ch, cx, cy = crop
+    left, top = min(0, cx), min(0, cy)
+    right, bottom = max(fw, cx + cw), max(fh, cy + ch)
+    scale = cols / (right - left)
+    rows = max(1, round((bottom - top) * scale / 2))
+
+    def at(r: int, c: int) -> tuple[float, float]:
+        return left + (c + 0.5) / scale, top + (r + 0.5) * 2 / scale
+
+    def in_crop(r: int, c: int) -> bool:
+        if not (0 <= r < rows and 0 <= c < cols):
+            return False
+        x, y = at(r, c)
+        return cx <= x < cx + cw and cy <= y < cy + ch
+
+    mid_col = int((fw / 2 - left) * scale)
+    lines = []
+    for r in range(rows):
+        line = []
+        for c in range(cols):
+            x, y = at(r, c)
+            inside_frame = 0 <= x < fw and 0 <= y < fh
+            if in_crop(r, c):
+                if not inside_frame:
+                    char = "!"
+                elif all(in_crop(r + dr, c + dc) for dr, dc in ((-1, 0), (1, 0), (0, -1), (0, 1))):
+                    char = "o"
+                else:
+                    char = "#"
+            elif inside_frame:
+                char = "|" if c == mid_col else "."
+            else:
+                char = " "
+            line.append(char)
+        lines.append("".join(line))
+    return lines
+
+
+MAP_GLYPHS = {"#": "█", "!": "█", "o": "░", "|": "┆", ".": "·"}
+
+
+class FrameMap(Static):
+    """The raw frame with the crop rectangle drawn on it."""
+
+    DEFAULT_CSS = """
+    FrameMap { border: round $primary; padding: 0 1; height: auto; margin-bottom: 1; }
+    """
+
+    def show(self, frame: tuple[int, int] | None, s: DisplaySettings, full_view: bool) -> None:
+        if frame is None:
+            self.update(t("tuning.map.unknown"))
+            return
+        accent = self.app.current_theme.accent or "yellow"
+        styles = {".": "dim", "|": "dim", "#": f"bold {accent}", "o": accent, "!": "bold red"}
+        crop = (s.crop_w, s.crop_h, s.crop_x, s.crop_y) if s.crop_enabled else (0, 0, 0, 0)
+        text = Text()
+        for line in frame_map(frame, crop):
+            for char in line:
+                text.append(MAP_GLYPHS.get(char, char), styles.get(char, ""))
+            text.append("\n")
+        w, h = frame
+        text.append(t("tuning.map.size", w=w, h=h), "bold")
+        if s.crop_enabled:
+            text.append("\n" + t("tuning.map.crop", w=s.crop_w, h=s.crop_h, x=s.crop_x, y=s.crop_y))
+            if s.crop_x + s.crop_w > w or s.crop_y + s.crop_h > h:
+                text.append("\n" + t("tuning.map.outside"), "bold red")
+        if full_view:
+            text.append("\n" + t("tuning.map.full_view"), "italic")
+        self.update(text)
 
 
 def _clamp(field: str, value: int) -> int:
@@ -77,6 +168,7 @@ class TuningScreen(Screen[None]):
         Binding("escape", "back", t("key.back")),
         Binding("f5", "apply", t("tuning.key.apply")),
         Binding("ctrl+r", "reset", t("tuning.key.reset")),
+        Binding("f6", "full_view", t("tuning.key.full_view")),
     ]
 
     app: UnMetaApp
@@ -87,6 +179,10 @@ class TuningScreen(Screen[None]):
         self.s: DisplaySettings = profile.display
         self.auto_apply = True
         self.windowed = True
+        self.full_view = False  # stream the raw frame to find the eye; the crop is kept
+        self.frame: tuple[int, int] | None = None  # raw frame size, once known
+        self._frame_from_device = False
+        self._applied: DisplaySettings | None = None  # what the running preview uses
         self._timer: Timer | None = None
 
     # Layout --------------------------------------------------------------------------
@@ -138,8 +234,10 @@ class TuningScreen(Screen[None]):
                     t("tuning.record"),
                     Input(s.record_path, id="record_path", placeholder=t("tuning.record_ph")),
                 )
-            with Vertical(id="side"):
+            with VerticalScroll(id="side"):
+                yield FrameMap(id="map")
                 yield NudgePad(t("tuning.pad"), id="pad")
+                yield self._row(t("tuning.key.full_view"), Switch(self.full_view, id="full_view"))
                 yield self._row(t("tuning.auto"), Switch(self.auto_apply, id="auto_apply"))
                 yield self._row(t("tuning.windowed"), Switch(self.windowed, id="windowed"))
                 with Horizontal(classes="buttons"):
@@ -152,16 +250,47 @@ class TuningScreen(Screen[None]):
         self.title = t("tuning.title", name=self.profile.name)
         self._update_preview()
         self.query_one("#pad", NudgePad).focus()
+        self._fetch_frame_size()
+
+    @work(thread=True, exclusive=True, group="frame")
+    def _fetch_frame_size(self) -> None:
+        if self.app.adb is None:
+            return
+        size = self.app.adb.display_size(self.profile.address)
+        if size:
+            self.app.call_from_thread(self._set_frame, size, True)
+
+    def _set_frame(self, size: tuple[int, int], from_device: bool) -> None:
+        # The crop is in headset pixels, so `wm size` wins. scrcpy's video size is only a
+        # fallback: it may be scaled down (a Quest 3 frame, 4128 px, is too wide for most
+        # encoders) or rounded.
+        if from_device or not self._frame_from_device:
+            self.frame = size
+            self._frame_from_device = from_device
+            self._update_preview()
+
+    def scrcpy_line(self, line: str) -> None:
+        """Fall back on scrcpy's log for the raw frame size while the preview is uncropped."""
+        size = parse_texture(line)
+        if size and not self._frame_from_device:
+            self._fetch_frame_size()  # streaming, so connected now: ask the headset again
+        a = self._applied
+        if size and a and not a.crop_enabled and not a.angle and not a.max_size:
+            self._set_frame(size, False)
 
     # Settings <-> widgets ------------------------------------------------------------
 
     def effective(self) -> DisplaySettings:
-        """Settings used for the preview stream: no fullscreen while tuning if asked."""
-        return replace(self.s, fullscreen=False) if self.windowed else self.s
+        """Settings used for the preview stream: windowed and uncropped if asked."""
+        s = replace(self.s, fullscreen=False) if self.windowed else self.s
+        if self.full_view:
+            s = replace(s, crop_enabled=False, angle=0, max_size=0, record_path="")
+        return s
 
     def _update_preview(self) -> None:
         args = build_args(self.profile.address, self.effective())
         self.query_one("#cmd", Static).update(format_command(args))
+        self.query_one("#map", FrameMap).show(self.frame, self.s, self.full_view)
 
     def _sync_inputs(self) -> None:
         for field in INT_FIELDS:
@@ -176,7 +305,7 @@ class TuningScreen(Screen[None]):
         if self._timer:
             self._timer.stop()
             self._timer = None
-        if self.auto_apply and self.app.runner.running:
+        if self.auto_apply and self.app.runner.running and self.effective() != self._applied:
             self._timer = self.set_timer(AUTO_APPLY_DELAY, self.action_apply)
 
     def on_input_changed(self, event: Input.Changed) -> None:
@@ -205,6 +334,12 @@ class TuningScreen(Screen[None]):
             return
         if field == "windowed":
             self.windowed = event.value
+        elif field == "full_view":
+            # Asked for explicitly: show it now, even without auto-apply or a running stream.
+            self.full_view = event.value
+            self._update_preview()
+            self.action_apply()
+            return
         elif field in BOOL_FIELDS:
             if getattr(self.s, field) == event.value:
                 return
@@ -247,6 +382,9 @@ class TuningScreen(Screen[None]):
         self._sync_inputs()
         self._changed()
 
+    def action_full_view(self) -> None:
+        self.query_one("#full_view", Switch).toggle()  # on_switch_changed does the rest
+
     def action_reset(self) -> None:
         key = self.s.preset if self.s.preset in PRESETS else next(iter(PRESETS))
         self.s.apply_preset(key)
@@ -259,13 +397,14 @@ class TuningScreen(Screen[None]):
             self._timer.stop()
             self._timer = None
         self.app.save_config()
-        self.app.start_stream(self.profile, self.effective())
+        self._applied = self.effective()
+        self.app.start_stream(self.profile, self._applied)
 
     def action_back(self) -> None:
         if self._timer:
             self._timer.stop()
         self.app.save_config()
-        if self.app.runner.running and self.windowed and self.s.fullscreen:
-            self.app.start_stream(self.profile)  # leave the preview: back to fullscreen
+        if self.app.runner.running and self._applied not in (None, self.s):
+            self.app.start_stream(self.profile)  # leave the preview: back to the real settings
         self.app.pop_screen()
         self.app.notify(t("tuning.saved"))
