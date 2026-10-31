@@ -26,6 +26,8 @@ Compression=lzma2
 SolidCompression=yes
 WizardStyle=modern
 UninstallDisplayName=UnMeta Screenshare
+UninstallDisplayIcon={app}\unmeta.exe
+SetupIconFile=unmeta.ico
 
 [Languages]
 Name: "en"; MessagesFile: "compiler:Default.isl"

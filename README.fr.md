@@ -1,3 +1,5 @@
+<img src="assets/logo.png" alt="" width="96" align="right">
+
 # UnMeta Screenshare
 
 **Affiche la vue et le son de ton Meta Quest sur ton ordinateur en Wi-Fi, sans l'app de diffusion de Meta.**
@@ -23,7 +25,7 @@ UnMeta Screenshare est une petite app en terminal pour Windows, macOS et Linux. 
 Quest  ──(adb en Wi-Fi, port 5555)──>  ton ordinateur  ──>  fenêtre scrcpy + son
 ```
 
-Le Quest produit une image côte à côte pour les deux yeux. Le préréglage *Meta Quest 3* recadre un seul œil et corrige son inclinaison pour obtenir une image plate normale.
+Le Quest produit une image côte à côte pour les deux yeux. Le préréglage *Meta Quest 3* recadre un seul œil et corrige son inclinaison pour obtenir une image plate normale. Le recadrage s'adapte à la taille d'image annoncée par le casque : rien à mesurer à la main.
 
 ## Prérequis
 
@@ -101,12 +103,14 @@ Allume le casque, lance l'app, appuie sur **Espace**.
 
 ## Réglages d'affichage
 
-Appuie sur `D`. Place le focus sur le panneau *Réglage en direct*, puis :
+Appuie sur `D`. Une mini-carte montre l'image entière du casque avec le rectangle de recadrage (en rouge s'il dépasse du bord). Place le focus sur le panneau *Réglage en direct*, puis :
 
 | Touche | Action |
 |---|---|
 | ← ↑ ↓ → | Déplacer le recadrage (10 px) |
+| Ctrl + flèches | Déplacer plus vite (50 px) |
 | Maj + flèches | Redimensionner le recadrage |
+| V ou F6 | Image complète oui/non : voir toute l'image pour repérer l'œil |
 | + / - | Pivoter (1°) |
 | Entrée ou F5 | Appliquer |
 | Ctrl+R | Revenir au préréglage |
@@ -119,7 +123,7 @@ Les réglages sont enregistrés par casque dans `config.json` (`unmeta --print-c
 
 - **Casque injoignable** : il est en veille, sur un autre réseau, ou a redémarré (refais l'assistant avec le câble).
 - **Pas de demande de débogage** : débranche et rebranche le câble ; vérifie le mode développeur ; essaie un autre câble.
-- **Image décentrée ou penchée** : ajuste le recadrage et l'angle ensemble.
+- **Image décentrée ou penchée** : dans *Réglages d'affichage*, appuie sur V pour voir toute l'image, place le rectangle sur l'œil, puis rappuie sur V. Recadrage et angle sont liés.
 - **Pas de son** : essaie le mode audio *PC uniquement*.
 - **Vidéo saccadée** : baisse le débit ou les IPS max, ou rapproche-toi de la box.
 
